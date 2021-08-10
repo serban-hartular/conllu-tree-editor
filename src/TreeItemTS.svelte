@@ -37,11 +37,6 @@
 
     }
 
-    // function divBlur(event) {
-    //     console.log('Div blur')
-    //     node.data = node.data
-    // }
-
 </script>
 <div style="background-color:{selected_id==node.data.ID ? 'lightblue':'white'}"
     on:click={handleClick} >

@@ -12,7 +12,7 @@
 <script lang="ts">
 //	import { slide } from 'svelte/transition'
 
-// import TreeItem from "./old/TreeItem.svelte";
+
 import ConlluTree from "./tree";
 import TreeItemTs from "./TreeItemTS.svelte";
 
