@@ -28,7 +28,8 @@
     {#each entries as [key, val] }
         <tr>
             <td class="key">{key}</td>
-            <td class="value" id="{key}" contenteditable={key == 'ID' ? "false" : "true"} on:keypress={handleKeypress} on:blur={keyvalBlur}>{val}</td>
+            <td class="value" id="{key}"
+            contenteditable={key == 'ID' || key == 'HEAD' ? "false" : "true"} on:keypress={handleKeypress} on:blur={keyvalBlur}>{val}</td>
         </tr>
     {/each}
 </table>

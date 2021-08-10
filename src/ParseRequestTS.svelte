@@ -8,7 +8,7 @@ import ConlluTree from "./tree";
 	let message = '';
     let sentence = '';
     function processInput() {
-        message = 'Se analizează'
+        message = 'Parse requested...'
         doPost()
     }
 
@@ -39,7 +39,7 @@ import ConlluTree from "./tree";
 Enunț:<br/>
 <form on:submit|preventDefault={processInput}>
     <input type="text" size="50" bind:value={sentence}><br/>
-    <button type="submit">Analiză</button>
+    <button type="submit">Parse</button>
 
 </form>
 <p><span style="font-style: italic;">{message}</span></p>

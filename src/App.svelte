@@ -18,6 +18,7 @@ import ConlluTree from './tree';
 	import TreeViewTs from './TreeViewTS.svelte';
 	import ParseRequestTs from './ParseRequestTS.svelte';
 	import DictEditorTs from './DictEditorTs.svelte';
+import EllipsisAnnotator from './EllipsisAnnotator.svelte';
 
 	$: {
 		conllu_tree;
@@ -30,12 +31,13 @@ import ConlluTree from './tree';
 	<tr>
 		<td>
 			<ParseRequestTs bind:conllu_tree={conllu_tree} />
-			Arbore de dependență <br/>
+			Dependency Tree <br/>
 			<TreeViewTs bind:root={conllu_tree} bind:node={conllu_tree} bind:selected_id={ts_selected_id} />
 		</td>
 		<td>
-			Editor Conllu
+			Conllu Item Editor
 			<DictEditorTs bind:obj={selected_data} />
+			<EllipsisAnnotator bind:conllu_data={selected_data} />
 		</td>
 	</tr>
 </table>
