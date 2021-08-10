@@ -1,9 +1,9 @@
 <script lang="ts">
 import { children } from 'svelte/internal';
 
-import ParseRequest from './ParseRequest.svelte';
-import Rand from './Rand.svelte';
-import TreeManager from './treeManager.js'
+// import ParseRequest from './old/ParseRequest.svelte';
+// import Rand from './old/Rand.svelte';
+// import TreeManager from './old/treeManager.js'
 import ConlluTree from './tree';
 
 	// let treeManager;
@@ -17,7 +17,7 @@ import ConlluTree from './tree';
 	// 	conllu_tree  = new ConlluTree({ID:1, DEPREL:'root', FORM:'Sunt', TREE_FORM:'Sunt', UPOS:'VERB', children:[]});
 	// 	conllu_tree.generateComponentText()
 	// }
-	import TreeView from './TreeView.svelte'
+	// import TreeView from './TreeView.svelte'
 
 	// let selected_id = '';
 	let ts_selected_id:string = ''
