@@ -15,9 +15,9 @@ import ConlluTree from './tree';
 			selected_data = (selected_node ? selected_node.data : null)
 		}
 	}
-	import TreeViewTs from './TreeViewTS.svelte';
-	import ParseRequestTs from './ParseRequestTS.svelte';
-	import DictEditorTs from './DictEditorTs.svelte';
+	import TreeView from './TreeView.svelte';
+	import ParseRequest from './ParseRequest.svelte';
+	import DictEditor from './DictEditor.svelte';
 	import EllipsisAnnotator from './EllipsisAnnotator.svelte';
 
 	$: {
@@ -38,10 +38,10 @@ import ConlluTree from './tree';
 <table>
 	<tr>
 		<td>
-			<ParseRequestTs bind:conllu_tree={conllu_tree} />
+			<ParseRequest bind:conllu_tree={conllu_tree} />
 			{#if conllu_tree}
 				<h3>Dependency Tree</h3>
-				<TreeViewTs bind:root={conllu_tree} bind:node={conllu_tree} bind:selected_id={ts_selected_id} />
+				<TreeView bind:root={conllu_tree} bind:node={conllu_tree} bind:selected_id={ts_selected_id} />
 				<div>
 					<br/>
 					<button on:click={exportToClipboard}>Export Conllu to Clipboard</button>				
@@ -51,7 +51,7 @@ import ConlluTree from './tree';
 		<td>
 			{#if selected_data}
 			<h3>Conllu Item Editor</h3>
-			<DictEditorTs bind:obj={selected_data} />
+			<DictEditor bind:obj={selected_data} />
 			<EllipsisAnnotator bind:conllu_data={selected_data} />				
 			{/if}
 		</td>

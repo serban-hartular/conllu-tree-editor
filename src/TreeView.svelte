@@ -14,7 +14,7 @@
 
 
 import ConlluTree from "./tree";
-import TreeItemTs from "./TreeItemTS.svelte";
+import TreeItem from "./TreeItem.svelte";
 
 	export let root : ConlluTree
 	export let node : ConlluTree
@@ -65,7 +65,7 @@ import TreeItemTs from "./TreeItemTS.svelte";
 			{:else}
 				<span class="no-arrow"/>
 			{/if}
-			<TreeItemTs bind:node={node} bind:is_expanded={expanded} bind:selected_id={selected_id} />
+			<TreeItem bind:node={node} bind:is_expanded={expanded} bind:selected_id={selected_id} />
 		</div>
 		
 		{#if children && children.length > 0 && expanded}
