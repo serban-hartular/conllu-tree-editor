@@ -28,10 +28,15 @@ import ConlluTree from "./tree";
         })
         .then(response => response.json())
         .then(data => {
-            conllu_tree = ConlluTree.treeFromJSONObj(data[0])
-            message = sentence
-            conllu_tree.generateComponentText()
-
+            var tree = data.tree
+            var error_msg = data.error_msg
+            if(error_msg && error_msg != '') {
+                message = error_msg
+            } else {
+                conllu_tree = ConlluTree.treeFromJSONObj(tree[0])
+                message = sentence
+                conllu_tree.generateComponentText()
+            }
             // for(var node of treeManager.traverse()) {
             //     if(treeManager.nodeMatches(node, {UPOS:['NOUN', 'PROPN']}))
             //         console.log(node.FORM)
