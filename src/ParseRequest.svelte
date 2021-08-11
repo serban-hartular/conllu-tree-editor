@@ -7,7 +7,10 @@ import ConlluTree from "./tree";
 
 	let message = '';
     let sentence = '';
+    let lang_value = 'ro'
+
     function processInput() {
+        //console.log(lang_value)
         message = 'Parse requested...'
         doPost()
     }
@@ -19,7 +22,8 @@ import ConlluTree from "./tree";
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                text: sentence
+                text: sentence,
+                lang: lang_value
             }),
         })
         .then(response => response.json())
@@ -39,6 +43,11 @@ import ConlluTree from "./tree";
 <h3>Enter sentence:</h3>
 <form on:submit|preventDefault={processInput}>
     <input type="text" size="50" bind:value={sentence}><br/>
+    Language:
+    <select bind:value={lang_value}>
+        <option value='ro'>Romanian</option>
+        <option value='en'>English</option>
+    </select>
     <button type="submit">Parse</button>
 
 </form>
