@@ -36,7 +36,7 @@ import ConlluTree from "./tree";
 	}
 </script>
 
-Enunț:<br/>
+<h3>Enter sentence:</h3>
 <form on:submit|preventDefault={processInput}>
     <input type="text" size="50" bind:value={sentence}><br/>
     <button type="submit">Parse</button>

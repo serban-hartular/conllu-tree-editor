@@ -3,21 +3,37 @@
 
     export let conllu_data : ConlluData
     let entries = [];
-    let ellipsis_count = '0'
+    let ellipsis_count = '1'
+    let antecedent_count = '1'
 
-    function onButtonClick() {
+    function onEllipsisClick() {
+        onAnnotateClick(true)
+    }
+    function onAntecedentClick() {
+        onAnnotateClick(false)
+    }
+    function onAnnotateClick(isEllipsis : boolean) {
         var text = conllu_data.MISC
         if(text != '') text += '|'
-        text += ('Ellipsis=' + ellipsis_count)
+        text += ((isEllipsis ? 'Ellipsis' : 'Antecedent') + '=' + (isEllipsis ? ellipsis_count : antecedent_count))
         conllu_data.MISC = text
-    }
-
-    function onCopyClick() {
-        navigator.clipboard.writeText(ellipsis_count)
+        var i = parseInt(isEllipsis ? ellipsis_count : antecedent_count) //increment
+        if(i != NaN) {
+            if(isEllipsis) ellipsis_count = String(i+1)
+            else antecedent_count = String(i+1)
+        }
     }
 
 </script>
 
-<button on:click={onButtonClick}>Ellipsis</button>
-<input bind:value={ellipsis_count}>
-<button on:click={onCopyClick}>Copy</button>
+<h3>Ellipsis Annotator</h3>
+<button on:click={onEllipsisClick}>Ellipsis</button>
+<input bind:value={ellipsis_count}> <br/>
+<button on:click={onAntecedentClick}>Antecedent</button>
+<input bind:value={antecedent_count}> <br/>
+
+<style>
+    h3 {
+        padding-bottom: 0px;
+    }
+</style>

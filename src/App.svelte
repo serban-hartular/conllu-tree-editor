@@ -3,8 +3,8 @@ import { children } from 'svelte/internal';
 
 import ConlluTree from './tree';
 
-	let conllu_tree : ConlluTree = ConlluTree.treeFromJSONObj({ID:1, DEPREL:'root', FORM:'Sunt', TREE_FORM:'Sunt', UPOS:'VERB', children:[]});;
-	conllu_tree.generateComponentText()
+	let conllu_tree : ConlluTree = null; //ConlluTree.treeFromJSONObj({ID:1, DEPREL:'root', FORM:'Sunt', TREE_FORM:'Sunt', UPOS:'VERB', children:[]});;
+	//conllu_tree.generateComponentText()
 
 	let ts_selected_id:string = ''
 	let selected_data = null
@@ -18,12 +18,20 @@ import ConlluTree from './tree';
 	import TreeViewTs from './TreeViewTS.svelte';
 	import ParseRequestTs from './ParseRequestTS.svelte';
 	import DictEditorTs from './DictEditorTs.svelte';
-import EllipsisAnnotator from './EllipsisAnnotator.svelte';
+	import EllipsisAnnotator from './EllipsisAnnotator.svelte';
 
 	$: {
 		conllu_tree;
-		conllu_tree.generateComponentText()
+		if(conllu_tree) conllu_tree.generateComponentText()
 	}
+
+	function exportToClipboard() {
+		var conllu_text = ConlluTree.toConllu(conllu_tree)
+		// console.log(conllu_text)
+		conllu_text = "# text = " + conllu_tree.component_text + '\n' + conllu_text
+        navigator.clipboard.writeText(conllu_text)
+    }
+
 
 </script>
 
@@ -31,13 +39,21 @@ import EllipsisAnnotator from './EllipsisAnnotator.svelte';
 	<tr>
 		<td>
 			<ParseRequestTs bind:conllu_tree={conllu_tree} />
-			Dependency Tree <br/>
-			<TreeViewTs bind:root={conllu_tree} bind:node={conllu_tree} bind:selected_id={ts_selected_id} />
+			{#if conllu_tree}
+				<h3>Dependency Tree</h3>
+				<TreeViewTs bind:root={conllu_tree} bind:node={conllu_tree} bind:selected_id={ts_selected_id} />
+				<div>
+					<br/>
+					<button on:click={exportToClipboard}>Export Conllu to Clipboard</button>				
+				</div>
+			{/if}
 		</td>
 		<td>
-			Conllu Item Editor
+			{#if selected_data}
+			<h3>Conllu Item Editor</h3>
 			<DictEditorTs bind:obj={selected_data} />
-			<EllipsisAnnotator bind:conllu_data={selected_data} />
+			<EllipsisAnnotator bind:conllu_data={selected_data} />				
+			{/if}
 		</td>
 	</tr>
 </table>
@@ -50,5 +66,9 @@ import EllipsisAnnotator from './EllipsisAnnotator.svelte';
     }
 	td {
 		vertical-align: text-top;
+	}
+
+	h3 {
+		padding-bottom: 0px;
 	}
 </style>

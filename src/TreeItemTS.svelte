@@ -42,11 +42,15 @@
     on:click={handleClick} >
     <div class="deprel" contenteditable="true" on:keypress={handleKeypress} on:blur={deprelBlur}>{node.data.DEPREL}</div>:
     
-    {#if is_expanded || !node.children || node.children.length == 0}
+    {#if is_expanded || !node.children || node.children.length == 0} 
         <div class="form">{node.data.FORM}</div>
-        <SvelteTooltip tip={JSON.stringify(node.data.FEATS)} right color="#AAAAAA">
-            (<span class="info" contenteditable="true" on:keypress={handleKeypress} on:blur={uposlBlur}> {node.data.UPOS}</span>)
+        {#if node.data.FEATS && node.data.FEATS != ''}
+        <SvelteTooltip tip={node.data.FEATS} right color="#AAAAAA">
+            (<span class="info"> {node.data.UPOS}</span>)
         </SvelteTooltip>
+        {:else}
+            (<span class="info"> {node.data.UPOS}</span>)
+        {/if}
     {:else}
         <span class="form">{node.component_text}</span>
     {/if}

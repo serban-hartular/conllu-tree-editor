@@ -1,3 +1,4 @@
+import { text } from "svelte/internal"
 
 export class ConlluData {
     ID: string = ''
@@ -10,13 +11,14 @@ export class ConlluData {
     DEPREL: string = ''
     DEPS: string = ''
     MISC: string = '' //Object = new Object()
+    static ELEMENTS = ['ID', 'FORM', 'LEMMA', 'UPOS', 'XPOS', 'FEATS', 'HEAD', 'DEPREL', 'DEPS', 'MISC']
     constructor(obj : Object) {
         for(var p in obj) {
             if(this[p] != undefined) {
-                if(typeof(this[p]) == 'string')
+//                if(typeof(this[p]) == 'string')
                     this[p] = ConlluData.conlluEntry2Property(String(obj[p]))
-                else
-                    this[p] = ConlluData.conlluEntry2Obj(obj[p])
+                // else
+                //     this[p] = ConlluData.conlluEntry2Obj(obj[p])
             }
         }
     }
@@ -28,29 +30,29 @@ export class ConlluData {
         if(prop == '') return '_'
         return prop
     }
-    static conlluEntry2Obj(text: string): Object {
-        var dict = new Object()
-        if(text == '_') return dict
+    // static conlluEntry2Obj(text: string): Object {
+    //     var dict = new Object()
+    //     if(text == '_') return dict
 
-        var list = text.split('|')
-        for(var item of list) {
-            var kv = item.split('=')
-            if(kv.length != 2) {
-                console.log('Error in value pair ' + item)
-            }
-            var k = kv[0], v = kv[1]
-            dict[k] = v
-        }
-        return dict
-    }
-    static obj2ConlluEntry(obj : Object): string {
-        var itemArray = new Array<string>()
-        for(var p in obj) {
-            itemArray.push(p + '=' + obj[p])
-        }
-        var text = itemArray.join('|')
-        return ConlluData.property2ConlluEntry(text) //if empty, return '_'
-    }
+    //     var list = text.split('|')
+    //     for(var item of list) {
+    //         var kv = item.split('=')
+    //         if(kv.length != 2) {
+    //             console.log('Error in value pair ' + item)
+    //         }
+    //         var k = kv[0], v = kv[1]
+    //         dict[k] = v
+    //     }
+    //     return dict
+    // }
+    // static obj2ConlluEntry(obj : Object): string {
+    //     var itemArray = new Array<string>()
+    //     for(var p in obj) {
+    //         itemArray.push(p + '=' + obj[p])
+    //     }
+    //     var text = itemArray.join('|')
+    //     return ConlluData.property2ConlluEntry(text) //if empty, return '_'
+    // }
     matches(dict : Object) {
         for(var p in dict)
             if(this[p] != undefined) {
@@ -96,6 +98,17 @@ export class ConlluData {
             data1[p] = new_node1[p]
         for(var p in new_node2)
             data2[p] = new_node2[p]
+    }
+    toConlluLine() : string {
+        var text = ''
+        for(var prop of ConlluData.ELEMENTS) {
+            var val = this[prop] ? this[prop] : '' 
+            //console.log(prop + ', ' + val)
+            val.replace(/\s+/, ' ')
+            if(val == '' || val == ' ') val = '_'
+            text += (val + '\t')
+        }
+        return text.slice(0, -1); //remove last tab
     }
 }
 
@@ -148,6 +161,7 @@ export default class ConlluTree {
         let index = old_parent.children.indexOf(this)
         old_parent.children.splice(index, 1)
         new_parent.addChild(this)
+        new_parent.redoHeads()
         return true
     }
     generateComponentText() {
@@ -165,8 +179,19 @@ export default class ConlluTree {
         }
         this.component_text = treeform
     }
+    redoHeads() {
+        for(var node of this.traverse()) {
+            if(node.parent == null) {
+                node.data.HEAD = 0
+            } else {
+                node.data.HEAD = node.parent.data.ID
+            }
+        }
+    }
     static switchPlaces(node1 : ConlluTree, node2 : ConlluTree, properties_in_place:Array<string>) {
         ConlluData.swapData(node1.data, node2.data, properties_in_place)
+        node1.redoHeads()
+        node2.redoHeads()
     }
     static treeFromJSONObj(obj : Object, children_label = 'children') : ConlluTree {
         var data = new ConlluData(obj)
@@ -176,5 +201,17 @@ export default class ConlluTree {
             tree.addChild(ConlluTree.treeFromJSONObj(child_data))
         }
         return tree
+    }
+    static toConllu(tree : ConlluTree) : string {
+        var text = ''
+        var list = new Array<ConlluData>()
+        for(var node of tree.traverse()) {
+            list.push(node.data)
+        }
+        list.sort((e1, e2) => parseFloat(e1.ID) - parseFloat(e2.ID))
+        for(var word of list) {
+            text = text + word.toConlluLine() + '\n'
+        }
+        return text + '\n'
     }
 }
