@@ -3,7 +3,7 @@ import ConlluTree from "./tree";
 
 
 	export let conllu_tree : ConlluTree
-
+    export let new_parse_flag : boolean
 
 	let message = '';
     let sentence = '';
@@ -36,6 +36,7 @@ import ConlluTree from "./tree";
                 conllu_tree = ConlluTree.treeFromJSONObj(tree[0])
                 message = sentence
                 conllu_tree.generateComponentText()
+                new_parse_flag = !new_parse_flag
             }
             // for(var node of treeManager.traverse()) {
             //     if(treeManager.nodeMatches(node, {UPOS:['NOUN', 'PROPN']}))

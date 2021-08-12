@@ -12,7 +12,7 @@
 <script>
 //	import { slide } from 'svelte/transition'
 
-import TreeItem from "./TreeItem.svelte";
+import TreeItem from "./old/TreeItem.svelte";
 
 	export let treeManager
 	export let node

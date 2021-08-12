@@ -13,7 +13,7 @@ export class ConlluData {
     MISC: string = '' //Object = new Object()
     static ELEMENTS = ['ID', 'FORM', 'LEMMA', 'UPOS', 'XPOS', 'FEATS', 'HEAD', 'DEPREL', 'DEPS', 'MISC']
     constructor(obj : Object) {
-        for(var p in obj) {
+        for(let p in obj) {
             if(this[p] != undefined) {
 //                if(typeof(this[p]) == 'string')
                     this[p] = ConlluData.conlluEntry2Property(String(obj[p]))
@@ -30,49 +30,16 @@ export class ConlluData {
         if(prop == '') return '_'
         return prop
     }
-    // static conlluEntry2Obj(text: string): Object {
-    //     var dict = new Object()
-    //     if(text == '_') return dict
-
-    //     var list = text.split('|')
-    //     for(var item of list) {
-    //         var kv = item.split('=')
-    //         if(kv.length != 2) {
-    //             console.log('Error in value pair ' + item)
-    //         }
-    //         var k = kv[0], v = kv[1]
-    //         dict[k] = v
-    //     }
-    //     return dict
-    // }
-    // static obj2ConlluEntry(obj : Object): string {
-    //     var itemArray = new Array<string>()
-    //     for(var p in obj) {
-    //         itemArray.push(p + '=' + obj[p])
-    //     }
-    //     var text = itemArray.join('|')
-    //     return ConlluData.property2ConlluEntry(text) //if empty, return '_'
-    // }
     matches(dict : Object) {
-        for(var p in dict)
-            if(this[p] != undefined) {
-                var possibilities = new Array<string>()
-                if(typeof(dict[p]) == 'string') { //condition is string
-                    possibilities.push(dict[p])
-                }
-                else {
-                    possibilities = new Array<string>(dict[p])
-                }
-                //iterate through conditions
-                var includes = false
-                for(var val of dict[p]) {
-                    if(this[p].includes(val)) {
-                        includes = true
-                        break
-                    }
-                }
-                if(!includes) return false
-            } 
+        let this_dict = new Object()
+        Object.assign(this_dict, this)
+        Object.assign(this_dict, ConlluData.getFeatureDict(this.FEATS)) //add FEATS k,v pairs
+        Object.assign(this_dict, ConlluData.getFeatureDict(this.MISC))  //add MISC k,v pairs
+        for(let p in dict) {
+            if(this_dict[p] == undefined) return false
+            if(this_dict[p].includes(dict[p])) continue
+            return false
+        } 
         return true
     }
     static swapData(data1 : ConlluData, data2 : ConlluData, properties_in_place : Array<string> = []) {
@@ -80,35 +47,49 @@ export class ConlluData {
         //to keep, eg, DEPREL in place despite the switch, properties_in_place = ['DEPREL']
         //first, store props in new objects
         let new_node1 = new Object()
-        for(var p in data2) {
+        for(let p in data2) {
             if(!properties_in_place.includes(p))
                 new_node1[p] = data2[p]
         }
-        for(var p of properties_in_place)
+        for(let p of properties_in_place)
             new_node1[p] = data1[p]
         let new_node2 = new Object()
-        for(var p in data1) {
+        for(let p in data1) {
             if(!properties_in_place.includes(p))
                 new_node2[p] = data1[p]
         }
-        for(var p of properties_in_place)
+        for(let p of properties_in_place)
             new_node2[p] = data2[p]
         //now do the swap
-        for(var p in new_node1)
+        for(let p in new_node1)
             data1[p] = new_node1[p]
-        for(var p in new_node2)
+        for(let p in new_node2)
             data2[p] = new_node2[p]
     }
     toConlluLine() : string {
-        var text = ''
-        for(var prop of ConlluData.ELEMENTS) {
-            var val = this[prop] ? this[prop] : '' 
+        let text = ''
+        for(let prop of ConlluData.ELEMENTS) {
+            let val = this[prop] ? this[prop] : '' 
             //console.log(prop + ', ' + val)
             val.replace(/\s+/, ' ')
             if(val == '' || val == ' ') val = '_'
             text += (val + '\t')
         }
         return text.slice(0, -1); //remove last tab
+    }
+    static getFeatureDict(text : string) : Object {
+        //this is for getting properties of FEATS and MISC, which follow the form
+        //"Key1=Value1|Key2=Value2"
+        //returns text doesn't follow this format
+        let dict = new Object()
+        let pair_list = text.split('|')
+        for(let pair of pair_list) {
+            let pair_array = pair.split('=')
+            if(pair_array.length != 2)
+                return null
+            dict[pair_array[0]] = pair_array[1]
+        }
+        return dict
     }
 }
 
@@ -122,7 +103,7 @@ export default class ConlluTree {
     constructor(data : ConlluData, parent : ConlluTree = null) {
         this.parent = parent
         this.data = data
-        // if(obj['children']) for(var child of obj['children']) {
+        // if(obj['children']) for(let child of obj['children']) {
         //     //console.log(child)
         //     this.children.push(new ConlluTree(child, this))
         // }
@@ -132,20 +113,26 @@ export default class ConlluTree {
         this.children.push(child)
         this.children.sort((e1, e2) => parseFloat(e1.data.ID) - parseFloat(e2.data.ID))
     }
-    * traverse() {
+    * traverse() : Generator<ConlluTree> {
         yield this;
-        for(var child of this.children) {
+        for(let child of this.children) {
             yield *child.traverse()
         }
     }
     matches(dict : Object) : boolean {
         return this.data.matches(dict)
     }
+    childMatches(dict : Object) : ConlluTree {
+        for(let child of this.children)
+            if(child.matches(dict))
+                return child
+        return null
+    }
     find(dict : Object) {
         if(this.matches(dict))
             return this
-        for(var child of this.children) {
-            var r = child.find(dict)
+        for(let child of this.children) {
+            let r = child.find(dict)
             if(r != null) return r
         }
         return null
@@ -165,14 +152,14 @@ export default class ConlluTree {
         return true
     }
     generateComponentText() {
-        for(var child of this.children)
+        for(let child of this.children)
             child.generateComponentText()
-        var constituent = [...this.children]
+        let constituent = [...this.children]
         constituent.push(this)
         constituent.sort((e1, e2) => parseFloat(e1.data.ID) - parseFloat(e2.data.ID))
-        var treeform = ''
+        let treeform = ''
         this.component_text = this.data.FORM
-        for(var elem of constituent) {
+        for(let elem of constituent) {
             treeform += elem.component_text
             if(elem==this && !(elem.data.MISC['SpaceAfter'] == 'No'))
                 treeform += ' '
@@ -180,9 +167,9 @@ export default class ConlluTree {
         this.component_text = treeform
     }
     redoHeads() {
-        for(var node of this.traverse()) {
+        for(let node of this.traverse()) {
             if(node.parent == null) {
-                node.data.HEAD = 0
+                node.data.HEAD = '0'
             } else {
                 node.data.HEAD = node.parent.data.ID
             }
@@ -194,22 +181,22 @@ export default class ConlluTree {
         node2.redoHeads()
     }
     static treeFromJSONObj(obj : Object, children_label = 'children') : ConlluTree {
-        var data = new ConlluData(obj)
-        var tree = new ConlluTree(data)
+        let data = new ConlluData(obj)
+        let tree = new ConlluTree(data)
         //console.log(obj[children_label])
-        if(obj[children_label]) for(var child_data of obj[children_label]) {
+        if(obj[children_label]) for(let child_data of obj[children_label]) {
             tree.addChild(ConlluTree.treeFromJSONObj(child_data))
         }
         return tree
     }
     static toConllu(tree : ConlluTree) : string {
-        var text = ''
-        var list = new Array<ConlluData>()
-        for(var node of tree.traverse()) {
+        let text = ''
+        let list = new Array<ConlluData>()
+        for(let node of tree.traverse()) {
             list.push(node.data)
         }
         list.sort((e1, e2) => parseFloat(e1.ID) - parseFloat(e2.ID))
-        for(var word of list) {
+        for(let word of list) {
             text = text + word.toConlluLine() + '\n'
         }
         return text + '\n'
