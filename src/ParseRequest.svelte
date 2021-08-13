@@ -1,5 +1,6 @@
 <script lang="ts">
-import ConlluTree from "./tree";
+    import ConlluTree from "./tree";
+    import SvelteTooltip from 'svelte-tooltip';    
 
 
 	export let conllu_tree : ConlluTree
@@ -44,6 +45,10 @@ import ConlluTree from "./tree";
             // }
         } );		
 	}
+
+    function displayTip() {
+        alert("Uses nlpcube, https://blah.com")
+    }
 </script>
 
 <h3>Enter sentence:</h3>
@@ -57,4 +62,15 @@ import ConlluTree from "./tree";
     <button type="submit">Parse</button>
 
 </form>
+<button on:click={displayTip}>?</button>
+
 <p><span style="font-style: italic;">{message}</span></p>
+
+<style>
+    /* .help {
+        text-decoration-line: underline;
+        text-decoration: dotted;
+        font-weight: bold;
+        ;
+    } */
+</style>

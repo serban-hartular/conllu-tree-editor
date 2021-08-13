@@ -1,7 +1,12 @@
 <script lang="ts">
-import { children, dataset_dev } from 'svelte/internal';
+	import { children, dataset_dev } from 'svelte/internal';
+	import TreeView from './TreeView.svelte';
+	import ParseRequest from './ParseRequest.svelte';
+	import DictEditor from './DictEditor.svelte';
+	import EllipsisAnnotator from './EllipsisAnnotator.svelte';
 
-import ConlluTree from './tree';
+
+	import ConlluTree from './tree';
 
 
 	let conllu_tree : ConlluTree = null;
@@ -16,13 +21,12 @@ import ConlluTree from './tree';
 			selected_data = (selected_node ? selected_node.data : null)
 		}
 	}
-	import TreeView from './TreeView.svelte';
-	import ParseRequest from './ParseRequest.svelte';
-	import DictEditor from './DictEditor.svelte';
-	import EllipsisAnnotator from './EllipsisAnnotator.svelte';
-	import { EllipsisDetector, ro_obj_licensers } from './ellipsisDetector';
-	let e_detector = new EllipsisDetector([ro_obj_licensers])
-	let e_list : Array<ConlluTree> = []
+	import { EllipsisDetector, EllipsisReport } from './ellipsisDetector';
+	import {ro_intranz_licensers, ro_obj_licensers, ro_passreflex_licensers, 
+			ro_copula_licensers, ro_indir_copula_licensers} from './roEllipsisPatterns'
+	let e_obj_detector = new EllipsisDetector([ro_obj_licensers, ro_passreflex_licensers,
+		ro_intranz_licensers, ro_copula_licensers, ro_indir_copula_licensers])
+	let e_list : Array<EllipsisReport> = []
 	let new_parse_flag = false
 
 	$: {
@@ -45,11 +49,11 @@ import ConlluTree from './tree';
     }
 
 	function findEllipses() {
-		e_list = e_detector.findEllipsis(conllu_tree)
-		// for(let node of conllu_tree.traverse()) {
-		// 	if(node.matches({'UPOS':'VERB'})) console.log("verb\t%s", node.data.FORM)
-		// 	if(node.matches({'PronType':'Int,Rel'})) console.log("rel\t%s", node.data.FORM)
-		// 	if(node.matches({'SpaceAfter':'No'})) console.log("no_space\t%s", node.data.FORM)			
+		e_list = e_obj_detector.findEllipsis(conllu_tree)
+		// let node_list = e_obj_detector.findEllipsis(conllu_tree) 
+		// console.log(node_list)
+		// for(let node of node_list) {
+		// 	e_list.push({node:node, message:'dirobj'})
 		// }
 	}
 	function onEllipsisClick(event) {
@@ -75,12 +79,14 @@ import ConlluTree from './tree';
 					<button on:click={findEllipses}>Find Ellipses</button>
 					<table class="ellipses">
 					{#if e_list.length > 0}
-						<tr><th colspan="2">Candidates</th></tr>
+						<tr><th colspan="3">Candidates</th></tr>
+						<tr><th>ID</th><th>Lemma</th><th>Missing</th></tr>
 					{/if}
 					{#each e_list as ellipsis}
 						<tr on:click={onEllipsisClick}>
-						<td class="ellipses" id={ellipsis.data.ID}>{ellipsis.data.ID}</td>
-						<td class="ellipses" id={ellipsis.data.ID}>{ellipsis.data.FORM}</td>
+						<td class="ellipses" id={ellipsis.node.data.ID}>{ellipsis.node.data.ID}</td>
+						<td class="ellipses" id={ellipsis.node.data.ID}>{ellipsis.node.data.FORM}</td>
+						<td class="ellipses" id={ellipsis.node.data.ID}>{ellipsis.type}</td>
 						</tr>
 					{/each}
 					</table>
@@ -112,5 +118,10 @@ import ConlluTree from './tree';
 	}
 	:global(button, input, select) {
 		padding: 1px;
+	}
+
+	.ellipses {
+		text-align: center;
+		padding: 3px
 	}
 </style>
