@@ -2,6 +2,8 @@
     //	import { slide } from 'svelte/transition'
         import SvelteTooltip from 'svelte-tooltip';    
         import type ConlluTree from './tree';
+        import {ud_deprel_descriptions, ro_deprel_descriptions, findDeprel} from './descriptions'
+        import { dataset_dev } from 'svelte/internal';
         
         export let node : ConlluTree;
         export let is_expanded : boolean;
@@ -27,7 +29,6 @@
     }
     function deprelBlur(event) {
         node.data.DEPREL = event.target.innerHTML
-        //console.log(event.target.innerHTML)
         selected_id = node.data.ID //let it still be selected, so as to update edit table
     }
     function uposlBlur(event) {
@@ -40,17 +41,21 @@
 </script>
 <div style="background-color:{selected_id==node.data.ID ? 'lightblue':'white'}"
     on:click={handleClick} >
-    <div class="deprel" contenteditable="true" on:keypress={handleKeypress} on:blur={deprelBlur}>{node.data.DEPREL}</div>:
-    
+        { #if findDeprel(node.data.DEPREL, [ro_deprel_descriptions, ud_deprel_descriptions]) &&
+            findDeprel(node.data.DEPREL, [ro_deprel_descriptions, ud_deprel_descriptions])['description'] &&
+            findDeprel(node.data.DEPREL, [ro_deprel_descriptions, ud_deprel_descriptions])['description'] != ''}
+            <!-- Have description, add tooltip. -->
+            <SvelteTooltip tip={findDeprel(node.data.DEPREL, [ro_deprel_descriptions, ud_deprel_descriptions])['description']} right color="#AAAAAA">
+                <div class="deprel">{node.data.DEPREL}</div>:
+            </SvelteTooltip>
+        {:else} <!-- no tooltip -->
+            <div class="deprel">{node.data.DEPREL}</div>:
+        {/if}
+
     {#if is_expanded || !node.children || node.children.length == 0} 
         <div class="form">{node.data.FORM}</div>
-        {#if node.data.FEATS && node.data.FEATS != ''}
-        <SvelteTooltip tip={node.data.FEATS} right color="#AAAAAA">
             (<span class="info"> {node.data.UPOS}</span>)
-        </SvelteTooltip>
-        {:else}
-            (<span class="info"> {node.data.UPOS}</span>)
-        {/if}
+        <!-- {/if} -->
     {:else}
         <span class="form">{node.component_text}</span>
     {/if}

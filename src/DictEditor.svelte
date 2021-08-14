@@ -22,14 +22,31 @@
         obj[event.target.id] = event.target.innerHTML
     }
 
+    import {findDeprel, ro_deprel_descriptions, ud_deprel_descriptions} from './descriptions'
+    function deprelURL(deprel : string) : string {
+        let description = findDeprel(deprel, [ro_deprel_descriptions, ud_deprel_descriptions])
+        if(!description) return null
+        let url = description.site
+        if(!url || url == '') return null
+        return url
+    }
 </script>
 
 <table>
     {#each entries as [key, val] }
         <tr>
-            <td class="key">{key}</td>
+            <td class="key">
+                {#if key == 'DEPREL' && deprelURL(val)}
+                    <a href={deprelURL(val)} target="_blank" rel="noopener noreferrer">{key}</a>
+                {:else}
+                   {key}
+                {/if}
+            </td>
             <td class="value" id="{key}"
-            contenteditable={key == 'ID' || key == 'HEAD' ? "false" : "true"} on:keypress={handleKeypress} on:blur={keyvalBlur}>{val}</td>
+            contenteditable={key == 'ID' || key == 'HEAD' ? "false" : "true"}
+            on:keypress={handleKeypress} on:blur={keyvalBlur}>      
+                {val}          
+            </td>
         </tr>
     {/each}
 </table>

@@ -1,14 +1,13 @@
 import type ConlluTree from "./tree";
 import { Licenser, DeprelCheck } from "./ellipsisDetector";
 
-
 export let ro_obj_licensers = new Licenser(
     'dirobj',
     [{ name: 'xcomp', checkFn: (n) => true },
     { name: 'ccomp', checkFn: (n) => true },
     { name: 'obj', checkFn: isRelativePersPron }],
     ['vrea', 'putea', 'dori', 'începe', 'termina', 'continua', 'încerca', 'reuși', 'refuza'],
-    (n) => isVerb(n) && !isPassReflexive(n)
+    (n) => isVerb(n) && !isPassReflexive(n) && !hasIobj(n)
 );
 
 export let ro_passreflex_licensers = new Licenser(
@@ -33,11 +32,25 @@ export let ro_copula_licensers = new Licenser(
     (n) => isPredicativeName(n) && !hasIobj(n)
 );
 
-export let ro_indir_copula_licensers = new Licenser(
+export let ro_iobj_copula_licensers = new Licenser(
     'subj of copulative pred w/iobj',
     [new DeprelCheck('csubj'), new DeprelCheck('nsubj', isRelativePersPron)],
-    ['posibil', 'imposibil', 'ușor', 'greu', 'scârbă', 'groază'],
+    ['posibil', 'imposibil', 'ușor', 'greu', 'scârbă', 'groază', 'indiferent'],
     (n) => isPredicativeName(n) && hasIobj(n)
+);
+
+export let ro_impers_experiment_iobj = new Licenser(
+    'subj of verb w/person iobj',
+    [new DeprelCheck('csubj'), new DeprelCheck('nsubj', isRelativePersPron)],
+    ['plăcea', 'dori', 'conveni', 'prii'],
+    (n) => isVerb(n) && hasIobj(n)
+);
+
+export let ro_impers_experiment_dobj = new Licenser(
+    'subj of verb w/person dobj',
+    [new DeprelCheck('csubj'), new DeprelCheck('nsubj', isRelativePersPron)],
+    ['încânta', 'dezgusta', 'scârbi', 'bucura', 'uimi', 'privi'],
+    (n) => isVerb(n) && hasDobj(n)
 );
 
 function isRelativePersPron(node: ConlluTree): boolean {
@@ -63,4 +76,11 @@ function hasIobj(node : ConlluTree) : boolean {
     if(node.childMatches({'DEPREL':'iobj'}) != null) return true
     if(isPredicativeName(node))
         return hasIobj(getCopula(node))
+}
+
+function getDobj(node : ConlluTree) : ConlluTree {
+    return node.childMatches({'DEPREL':'obj'})
+}
+function hasDobj(node : ConlluTree) : boolean {
+    return getDobj(node) != null
 }

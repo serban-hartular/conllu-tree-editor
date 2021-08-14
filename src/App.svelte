@@ -4,6 +4,7 @@
 	import ParseRequest from './ParseRequest.svelte';
 	import DictEditor from './DictEditor.svelte';
 	import EllipsisAnnotator from './EllipsisAnnotator.svelte';
+	import Modal,{getModal} from './Modal.svelte'
 
 
 	import ConlluTree from './tree';
@@ -23,9 +24,12 @@
 	}
 	import { EllipsisDetector, EllipsisReport } from './ellipsisDetector';
 	import {ro_intranz_licensers, ro_obj_licensers, ro_passreflex_licensers, 
-			ro_copula_licensers, ro_indir_copula_licensers} from './roEllipsisPatterns'
+			ro_copula_licensers, ro_iobj_copula_licensers, ro_impers_experiment_dobj,
+			ro_impers_experiment_iobj} from './roEllipsisPatterns'
+
 	let e_obj_detector = new EllipsisDetector([ro_obj_licensers, ro_passreflex_licensers,
-		ro_intranz_licensers, ro_copula_licensers, ro_indir_copula_licensers])
+		ro_intranz_licensers, ro_copula_licensers, ro_iobj_copula_licensers,
+		ro_impers_experiment_iobj, ro_impers_experiment_dobj])
 	let e_list : Array<EllipsisReport> = []
 	let new_parse_flag = false
 
@@ -65,15 +69,15 @@
 
 <table>
 	<tr>
-		<td>
+		<td style="padding-left: 20px;">
 			<ParseRequest bind:conllu_tree={conllu_tree} bind:new_parse_flag={new_parse_flag} />
 			{#if conllu_tree}
-				<h3>Dependency Tree</h3>
+				<table><tr>
+				<td><h3>Dependency Tree</h3></td>
+				<td><button class="help" on:click={()=>getModal('modal_deptree').open()}>?</button>
+				</td>
+				</tr></table>
 				<TreeView bind:root={conllu_tree} bind:node={conllu_tree} bind:selected_id={selected_id} />
-				<br/>
-				<div>
-					<button on:click={exportToClipboard}>Export Conllu to Clipboard</button>				
-				</div>
 				<br/>
 				<div>
 					<button on:click={findEllipses}>Find Ellipses</button>
@@ -95,13 +99,35 @@
 		</td>
 		<td>
 			{#if selected_data}
-			<h3>Conllu Item Editor</h3>
+			<table><tr>
+			<td><h3>Conllu Item Editor</h3></td>
+			<td><button class="help" on:click={()=>getModal('conllu_item').open()}>?</button></td>
+			</tr></table>
 			<DictEditor bind:obj={selected_data} />
 			<EllipsisAnnotator bind:conllu_data={selected_data} />				
+			<br/>
+			<div>
+				<button on:click={exportToClipboard}>Export Conllu to Clipboard</button>				
+			</div>
 			{/if}
 		</td>
 	</tr>
 </table>
+
+<Modal id="modal_deptree">
+	<p class="modal">The format of an expanded node is <b>dependency_relation:</b> word_form <i>(PART_OF_SPEECH)</i></p>
+	<p class="modal">Hover cursor over dependency relation (deprel) to see a short description.</p>
+	<p class="modal">Drag and drop tree elements to change tree structure.</p>
+	<p class="modal">If you drag an element over another element, it will become the latter's child.</p>
+	<p class="modal">If you drag an element over its own parent or child, they will exchange places.</p>
+	<p class="modal">Click to select an element, and edit it in the Conllu Item table.</p>
+</Modal>
+
+<Modal id="conllu_item">
+	<p class="modal">Click to edit the values in the second column.</p>
+	<p class="modal">Click on DEPREL for the dependency relation's reference page</p>
+	<p class="modal">Warning! App does not check you inputs for correctness.</p>
+</Modal>
 
 
 <style>
@@ -122,6 +148,16 @@
 
 	.ellipses {
 		text-align: center;
-		padding: 3px
+		padding: 0px 10px 0px 10px;
+	}
+	.help {
+        padding: 0px 10px 0px 10px;
+        font-weight: bold;
+        ;
+    }
+	p.modal {
+		text-indent: 10px;
+		padding-bottom: 0px;
+		margin: 0px;
 	}
 </style>

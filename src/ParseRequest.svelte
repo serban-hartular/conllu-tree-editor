@@ -1,6 +1,8 @@
 <script lang="ts">
     import ConlluTree from "./tree";
-    import SvelteTooltip from 'svelte-tooltip';    
+    import SvelteTooltip from 'svelte-tooltip';   
+    import Modal,{getModal} from './Modal.svelte'
+ 
 
 
 	export let conllu_tree : ConlluTree
@@ -34,10 +36,14 @@
             if(error_msg && error_msg != '') {
                 message = error_msg
             } else {
-                conllu_tree = ConlluTree.treeFromJSONObj(tree[0])
-                message = sentence
-                conllu_tree.generateComponentText()
-                new_parse_flag = !new_parse_flag
+                try {
+                    conllu_tree = ConlluTree.treeFromJSONObj(tree[0])
+                    message = sentence
+                    conllu_tree.generateComponentText()
+                    new_parse_flag = !new_parse_flag
+                } catch(e) {
+                    message = e.name + ': ' + e.message
+                }
             }
             // for(var node of treeManager.traverse()) {
             //     if(treeManager.nodeMatches(node, {UPOS:['NOUN', 'PROPN']}))
@@ -46,9 +52,6 @@
         } );		
 	}
 
-    function displayTip() {
-        alert("Uses nlpcube, https://blah.com")
-    }
 </script>
 
 <h3>Enter sentence:</h3>
@@ -60,17 +63,24 @@
         <option value='en'>English</option>
     </select>
     <button type="submit">Parse</button>
-
+    <button class="help" on:click={()=>getModal('modal1').open()}>?</button>
 </form>
-<button on:click={displayTip}>?</button>
 
 <p><span style="font-style: italic;">{message}</span></p>
 
+<Modal id="modal1">
+	<p class="modal">Sentence parse is carried out by the NLP-Cube dependency parser, trained on Universal Dependency corpora.</p>
+    <p class="modal">Project site <a href="https://github.com/adobe/NLP-Cube" target="_blank" rel="noopener noreferrer">here</a>.</p>
+    <p class="modal">As a statistical parser, it may yield erroneous parses. The resulting tree is editable (see below).</p>
+    Citation:<blockquote class="modal"><a href="http://www.aclweb.org/anthology/K18-2017" target="_blank" rel="noopener noreferrer">NLP-Cube: End-to-End Raw Text Processing With Neural Networks</a>, 
+        Boroș, Tiberiu and Dumitrescu, Stefan Daniel and Burtica, Ruxandra, Proceedings of the CoNLL 2018 Shared Task: Multilingual Parsing from Raw Text to Universal Dependencies, Association for Computational Linguistics. p. 171--179. October 2018</blockquote>
+</Modal>
+
+
 <style>
-    /* .help {
-        text-decoration-line: underline;
-        text-decoration: dotted;
+    .help {
+        padding: 0px 10px 0px 10px;
         font-weight: bold;
         ;
-    } */
+    }
 </style>
