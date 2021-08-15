@@ -161,7 +161,7 @@ export default class ConlluTree {
         this.component_text = this.data.FORM
         for(let elem of constituent) {
             treeform += elem.component_text
-            if(elem==this && !(elem.data.MISC['SpaceAfter'] == 'No'))
+            if(elem==this && !(elem.matches({'SpaceAfter': 'No'})))
                 treeform += ' '
         }
         this.component_text = treeform

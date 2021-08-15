@@ -7,10 +7,10 @@
 
 	export let conllu_tree : ConlluTree
     export let new_parse_flag : boolean
+    export let lang_value :string
 
 	let message = '';
     let sentence = '';
-    let lang_value = 'ro'
 
     function processInput() {
         //console.log(lang_value)

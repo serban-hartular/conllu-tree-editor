@@ -15,6 +15,8 @@
 
 	let selected_id:string = ''
 	let selected_data = null
+	let lang_value = 'ro'
+
 	$:{
 		if(selected_id != '') {
 			conllu_tree = conllu_tree
@@ -46,7 +48,7 @@
 	}
 
 	function exportToClipboard() {
-		var conllu_text = ConlluTree.toConllu(conllu_tree)
+		let conllu_text = ConlluTree.toConllu(conllu_tree)
 		// console.log(conllu_text)
 		conllu_text = "# text = " + conllu_tree.component_text + '\n' + conllu_text
         navigator.clipboard.writeText(conllu_text)
@@ -65,12 +67,36 @@
 		// console.log(event.target.id)
 		selected_id = event.target.id
 	}
+	function addToDB() {
+		let conllu_text = ConlluTree.toConllu(conllu_tree)
+		// console.log(conllu_text)
+		conllu_text = "# text = " + conllu_tree.component_text + '\n' + conllu_text
+		fetch('./store', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                conllu: conllu_text,
+                lang: lang_value
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            let error_msg = data.error_msg
+            if(error_msg && error_msg != '') {
+                console.log(error_msg)
+            } else {
+				console.log('OK')
+			}
+		});
+	}
 </script>
 
 <table>
 	<tr>
 		<td style="padding-left: 20px;">
-			<ParseRequest bind:conllu_tree={conllu_tree} bind:new_parse_flag={new_parse_flag} />
+			<ParseRequest bind:conllu_tree={conllu_tree} bind:lang_value={lang_value} bind:new_parse_flag={new_parse_flag} />
 			{#if conllu_tree}
 				<table><tr>
 				<td><h3>Dependency Tree</h3></td>
@@ -81,6 +107,7 @@
 				<br/>
 				<div>
 					<button on:click={findEllipses}>Find Ellipses</button>
+					<button class="help" on:click={()=>getModal('modal_findellipsis').open()}>?</button>
 					<table class="ellipses">
 					{#if e_list.length > 0}
 						<tr><th colspan="3">Candidates</th></tr>
@@ -109,23 +136,42 @@
 			<div>
 				<button on:click={exportToClipboard}>Export Conllu to Clipboard</button>				
 			</div>
+			<div>
+				<button on:click={addToDB}>Add to Server Database</button>				
+			</div>
 			{/if}
 		</td>
 	</tr>
 </table>
 
 <Modal id="modal_deptree">
-	<p class="modal">The format of an expanded node is <b>dependency_relation:</b> word_form <i>(PART_OF_SPEECH)</i></p>
+	<p class="modal">Click an arrow to expand/contract a node in the tree.</p>
+	<p class="modal">The format of an expanded node is
+		<span style="font-family: Georgia, 'Times New Roman', Times, serif"><b>dependency_relation:</b> word_form <i>(PART_OF_SPEECH)</i></span>.</p>
 	<p class="modal">Hover cursor over dependency relation (deprel) to see a short description.</p>
-	<p class="modal">Drag and drop tree elements to change tree structure.</p>
+	<p class="modal">Drag and drop tree elements to change tree structure (note that the deprel stays in place).</p>
 	<p class="modal">If you drag an element over another element, it will become the latter's child.</p>
 	<p class="modal">If you drag an element over its own parent or child, they will exchange places.</p>
 	<p class="modal">Click to select an element, and edit it in the Conllu Item table.</p>
 </Modal>
 
+<Modal id="modal_findellipsis">
+	<p class="modal">The specific type of ellipsis this algorithm looks for is the verb-licensed 
+		ellipsis of verb phrases. Its closest equivalent in English would be VP-/Post-Auxiliary
+		Ellipsis and Null Complement Anaphora, depending on the licenser.
+	</p>
+	<p class="modal">The method used to find ellipses is described on this page.</p>
+	<p class="modal">It's worth emphasizing that this method depends on a correct parse. 
+		Correcting the parse tree and clicking the "Find Ellipsis" button again may well yield
+		the expected result.
+	</p>
+</Modal>
+
+
 <Modal id="conllu_item">
 	<p class="modal">Click to edit the values in the second column.</p>
 	<p class="modal">Click on DEPREL for the dependency relation's reference page</p>
+	<p class="modal">The ID and HEAD values cannot be edited.</p>
 	<p class="modal">Warning! App does not check you inputs for correctness.</p>
 </Modal>
 
@@ -155,7 +201,7 @@
         font-weight: bold;
         ;
     }
-	p.modal {
+	:global(p.modal) {
 		text-indent: 10px;
 		padding-bottom: 0px;
 		margin: 0px;
