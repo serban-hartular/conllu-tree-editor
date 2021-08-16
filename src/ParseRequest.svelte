@@ -15,6 +15,8 @@
 
     function processInput() {
         //console.log(lang_value)
+        if(!sentence || sentence.trim() == '')
+            return
         message = 'Parse requested...'
         doPost()
     }
@@ -74,17 +76,28 @@
     </select>        
     
     <button type="submit">Parse</button>
-    <button class="help" on:click={()=>getModal('modal1').open()}>?</button>
+    <button class="help" on:click={()=>getModal('parse_modal').open()}>?</button>
 </form>
 
 <p><span style="font-style: italic;">{message}</span></p>
 
-<Modal id="modal1">
-	<p class="modal">Sentence parse is carried out by the NLP-Cube dependency parser, trained on Universal Dependency corpora.</p>
-    <p class="modal">Project site <a href="https://github.com/adobe/NLP-Cube" target="_blank" rel="noopener noreferrer">here</a>.</p>
-    <p class="modal">As a statistical parser, it may yield erroneous parses. The resulting tree is editable (see below).</p>
-    Citation:<blockquote class="modal"><a href="http://www.aclweb.org/anthology/K18-2017" target="_blank" rel="noopener noreferrer">NLP-Cube: End-to-End Raw Text Processing With Neural Networks</a>, 
-        Boroș, Tiberiu and Dumitrescu, Stefan Daniel and Burtica, Ruxandra, Proceedings of the CoNLL 2018 Shared Task: Multilingual Parsing from Raw Text to Universal Dependencies, Association for Computational Linguistics. p. 171--179. October 2018</blockquote>
+<Modal id="parse_modal">
+	<p class="modal">Two parsers are available for Romanian: RACAI's
+        <a href='http://relate.racai.ro/index.php?path=teprolin/doc_dev' target="_blank" rel="noopener noreferrer">TEPROLIN</a> 
+        service and the 
+        <a href="https://github.com/adobe/NLP-Cube" target="_blank" rel="noopener noreferrer">NLP-Cube</a> 
+        dependency parser. The RACAI parse can be slower, since it accesses a third party site, but
+        it seems to use different taggers and lemmatizers and may be more accurate for certain constructions.
+    </p>
+    <p class="modal">As statistical parsers, both may yield erroneous parses. The resulting tree
+        is editable on this page.</p>
+    Citations:
+    <blockquote class="modal"><a href="http://www.aclweb.org/anthology/K18-2017" target="_blank" rel="noopener noreferrer">NLP-Cube: End-to-End Raw Text Processing With Neural Networks</a>, 
+        Boroș, Tiberiu and Dumitrescu, Stefan Daniel and Burtica, Ruxandra, Proceedings of the CoNLL 2018 Shared Task: Multilingual Parsing from Raw Text to Universal Dependencies, Association for Computational Linguistics. p. 171--179. October 2018
+    </blockquote>
+    <blockquote class="modal">
+        <b>Radu Ion</b>. (2018). TEPROLIN: An Extensible, Online Text Preprocessing Platform for Romanian. In Proceedings of the International Conference on Linguistic Resources and Tools for Processing Romanian Language (ConsILR 2018), November 22-23, 2018, Iași, România
+    </blockquote>
 </Modal>
 
 

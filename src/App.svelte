@@ -16,6 +16,8 @@
 	let selected_id:string = ''
 	let selected_data = null
 	let lang_value = 'ro'
+	let comment_value = ''
+	let sentence_src = ''
 
 	$:{ 
 		selected_id;
@@ -51,6 +53,7 @@
 	}
 
 	function exportToClipboard() {
+		if(!conllu_tree) return
 		let conllu_text = ConlluTree.toConllu(conllu_tree)
 		// console.log(conllu_text)
 		conllu_text = "# text = " + conllu_tree.component_text + '\n' + conllu_text
@@ -71,9 +74,11 @@
 		selected_id = event.target.id
 	}
 	function addToDB() {
-		let conllu_text = ConlluTree.toConllu(conllu_tree)
-		// console.log(conllu_text)
-		conllu_text = "# text = " + conllu_tree.component_text + '\n' + conllu_text
+		let conllu_text = ''
+		if(conllu_tree) {
+			conllu_text = ConlluTree.toConllu(conllu_tree)
+			conllu_text = "# text = " + conllu_tree.component_text + '\n' + conllu_text
+		}
 		fetch('./store', {
             method: 'POST',
             headers: {
@@ -81,7 +86,8 @@
             },
             body: JSON.stringify({
                 conllu: conllu_text,
-                lang: lang_value
+                lang: lang_value,
+				comment: comment_value
             }),
         })
         .then(response => response.json())
@@ -89,9 +95,11 @@
             let error_msg = data.error_msg
             if(error_msg && error_msg != '') {
                 console.log(error_msg)
+				
             } else {
 				console.log('OK')
 			}
+			getModal("add_to_db").close()
 		});
 	}
 </script>
@@ -134,15 +142,15 @@
 			<td><button class="help" on:click={()=>getModal('conllu_item').open()}>?</button></td>
 			</tr></table>
 			<DictEditor bind:obj={selected_data} />
-			<EllipsisAnnotator bind:conllu_data={selected_data} />				
+			<EllipsisAnnotator bind:conllu_data={selected_data} />	
+			{/if}			
 			<br/>
 			<div>
 				<button on:click={exportToClipboard}>Export Conllu to Clipboard</button>				
 			</div>
 			<div>
-				<button on:click={addToDB}>Add to Server Database</button>				
+				<button on:click={()=>getModal('add_to_db').open()}>Add to Server Database</button>				
 			</div>
-			{/if}
 		</td>
 	</tr>
 </table>
@@ -178,6 +186,20 @@
 	<p class="modal">Warning! App does not check you inputs for correctness.</p>
 </Modal>
 
+<Modal id="add_to_db">
+	<p class="modal" style="text-align: center;">Help a PhD student! Give feedback!</p>
+	<p class="modal">Enter a comment about problems with the page, the parse result,
+		the ellipsis finder, anything. Your comment will be sent together with the 
+		parse tree itself. Guaranteed good karma!
+	</p>
+	<div><p>
+		<textarea cols="100" rows="4" bind:value={comment_value}></textarea>
+	</p><p>
+		Sentence source/id (optional): <input bind:value={sentence_src} />
+	</p><p>
+		<button on:click={addToDB}>Submit</button>		
+	</p></div>
+</Modal>
 
 <style>
 	table td {
