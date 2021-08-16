@@ -8,6 +8,7 @@
 	export let conllu_tree : ConlluTree
     export let new_parse_flag : boolean
     export let lang_value :string
+    let parser;
 
 	let message = '';
     let sentence = '';
@@ -19,6 +20,7 @@
     }
 
     function doPost () {
+        console.log(lang_value + ', ' + parser)
         fetch('./parse', {
             method: 'POST',
             headers: {
@@ -26,7 +28,8 @@
             },
             body: JSON.stringify({
                 text: sentence,
-                lang: lang_value
+                lang: lang_value,
+                parser: parser
             }),
         })
         .then(response => response.json())
@@ -62,6 +65,14 @@
         <option value='ro'>Romanian</option>
         <option value='en'>English</option>
     </select>
+    Parser:
+    <select bind:value={parser}>
+        {#if lang_value == 'ro'}
+        <option value='racai'>RACAI - TEPROLIN</option>
+        {/if}
+        <option value='nlpcube'>NLP Cube</option>
+    </select>        
+    
     <button type="submit">Parse</button>
     <button class="help" on:click={()=>getModal('modal1').open()}>?</button>
 </form>

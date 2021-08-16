@@ -40,14 +40,14 @@ export let ro_iobj_copula_licensers = new Licenser(
 );
 
 export let ro_impers_experiment_iobj = new Licenser(
-    'subj of verb w/person iobj',
+    'subj of impers verb w/iobj',
     [new DeprelCheck('csubj'), new DeprelCheck('nsubj', isRelativePersPron)],
     ['plăcea', 'dori', 'conveni', 'prii'],
     (n) => isVerb(n) && hasIobj(n)
 );
 
 export let ro_impers_experiment_dobj = new Licenser(
-    'subj of verb w/person dobj',
+    'subj of impers verb w/dobj',
     [new DeprelCheck('csubj'), new DeprelCheck('nsubj', isRelativePersPron)],
     ['încânta', 'dezgusta', 'scârbi', 'bucura', 'uimi', 'privi'],
     (n) => isVerb(n) && hasDobj(n)

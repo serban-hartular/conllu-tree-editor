@@ -17,11 +17,14 @@
 	let selected_data = null
 	let lang_value = 'ro'
 
-	$:{
+	$:{ 
+		selected_id;
 		if(selected_id != '') {
 			conllu_tree = conllu_tree
 			let selected_node = conllu_tree.find({'ID':selected_id})
 			selected_data = (selected_node ? selected_node.data : null)
+		} else {
+			selected_data = null
 		}
 	}
 	import { EllipsisDetector, EllipsisReport } from './ellipsisDetector';
