@@ -87,7 +87,8 @@
             body: JSON.stringify({
                 conllu: conllu_text,
                 lang: lang_value,
-				comment: comment_value
+				comment: comment_value,
+				sentence_src: sentence_src
             }),
         })
         .then(response => response.json())
